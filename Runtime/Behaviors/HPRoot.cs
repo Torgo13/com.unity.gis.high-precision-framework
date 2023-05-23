@@ -233,7 +233,7 @@ namespace Unity.Geospatial.HighPrecision
         /// </summary>
         private void LateUpdate()
         {
-            s_LateUpdateMarker.Begin();
+            /*s_LateUpdateMarker.Begin();
 
             if (transform.hasChanged)
             {
@@ -244,7 +244,7 @@ namespace Unity.Geospatial.HighPrecision
 
             UpdateTransforms();
 
-            s_LateUpdateMarker.End();
+            s_LateUpdateMarker.End();*/
         }
     }
 }

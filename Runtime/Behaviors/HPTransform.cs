@@ -572,8 +572,8 @@ namespace Unity.Geospatial.HighPrecision
         /// </summary>
         private void LateUpdate()
         {
-            if (m_Parent == null)
-                UpdateFromParent();
+            /*if (m_Parent == null)
+                UpdateFromParent();*/
         }
 
         /// <summary>
