@@ -3,6 +3,7 @@
 using UnityEngine;
 using UnityEngine.Assertions;
 using Unity.Mathematics;
+using System.Runtime.CompilerServices;
 
 namespace Unity.Geospatial.HighPrecision
 {
