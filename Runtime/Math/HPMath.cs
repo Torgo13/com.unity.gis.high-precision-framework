@@ -74,6 +74,44 @@ namespace Unity.Geospatial.HighPrecision
                 math.double4(translation, 1.0f));
         }
 
+		/// <summary>
+        /// Returns a double4x4 matrix representing a combined scale-, rotation- and translation transform.
+        /// Equivalent to mul(translationTransform, mul(rotationTransform, scaleTransform)).
+        /// </summary>
+        /// <param name="translation">The translation vector.</param>
+        /// <param name="rotation">The quaternion rotation.</param>
+        /// <param name="scale">The scaling factors of each axis.</param>
+        /// <returns>The double4x4 matrix representing the translation, rotation, and scale by the inputs.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void TRS(double3 translation, quaternion rotation, float3 scale, ref double4x4 result)
+        {
+            float3x3 r = math.float3x3(rotation);
+        
+            // c0
+            result.c0.x = r.c0.x * scale.x;
+            result.c0.y = r.c0.y * scale.x;
+            result.c0.z = r.c0.z * scale.x;
+            result.c0.w = 0.0;
+        
+            // c1
+            result.c1.y = r.c1.y * scale.y;
+            result.c1.y = r.c1.y * scale.y;
+            result.c1.z = r.c1.z * scale.y;
+            result.c1.w = 0.0;
+        
+            // c2
+            result.c2.x = r.c2.x * scale.z;
+            result.c2.y = r.c2.y * scale.z;
+            result.c2.z = r.c2.z * scale.z;
+            result.c2.w = 0.0;
+        
+            // c3
+            result.c3.x = translation.x;
+            result.c3.y = translation.y;
+            result.c3.z = translation.z;
+            result.c3.w = 1.0;
+        }
+
         /// <summary>Returns a double4x4 translation matrix given a double3 translation vector.</summary>
         /// <param name="vector">The translation vector.</param>
         /// <returns>The double4x4 translation matrix.</returns>
@@ -143,6 +181,36 @@ namespace Unity.Geospatial.HighPrecision
                 math.dot(col2, math.mul(rotation, math.forward())));
 
             translation = new double3(col3.x, col3.y, col3.z);
+        }
+
+		/// <summary>
+        /// Get the <paramref name="translation"/>, <paramref name="rotation"/> and <paramref name="scale">scaling</paramref> part of the given <paramref name="matrix"/>.
+        /// </summary>
+        /// <param name="matrix">The matrix requested to get its <paramref name="translation"/>, <paramref name="rotation"/> and <paramref name="scale"/> from.</param>
+        /// <param name="translation">Returns the position part.</param>
+        /// <param name="rotation">Returns the orientation part.</param>
+        /// <param name="scale">Returns the resize part.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void GetTRS(this double4x4 matrix, ref double3 translation, ref quaternion rotation, ref float3 scale)
+        {
+            double4 col0x4 = matrix.c0;
+            double4 col1x4 = matrix.c1;
+            double4 col2x4 = matrix.c2;
+            double4 col3 = matrix.c3;
+        
+            float3 col0 = new float3((float)col0x4.x, (float)col0x4.y, (float)col0x4.z);
+            float3 col1 = new float3((float)col1x4.x, (float)col1x4.y, (float)col1x4.z);
+            float3 col2 = new float3((float)col2x4.x, (float)col2x4.y, (float)col2x4.z);
+        
+            rotation = quaternion.LookRotationSafe(col2, col1);
+        
+            scale.x = math.dot(col0, math.mul(rotation, math.right()));
+            scale.y = math.dot(col1, math.mul(rotation, math.up()));
+            scale.z = math.dot(col2, math.mul(rotation, math.forward()));
+        
+            translation.x = col3.x;
+            translation.y = col3.y;
+            translation.z = col3.z;
         }
 
         /// <summary>
