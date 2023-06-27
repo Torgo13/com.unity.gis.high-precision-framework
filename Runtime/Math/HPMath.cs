@@ -191,7 +191,7 @@ namespace Unity.Geospatial.HighPrecision
         /// <param name="rotation">Returns the orientation part.</param>
         /// <param name="scale">Returns the resize part.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void GetTRS(this double4x4 matrix, ref double3 translation, ref quaternion rotation, ref float3 scale)
+        public static void GetTRSByRef(this double4x4 matrix, ref double3 translation, ref quaternion rotation, ref float3 scale)
         {
             double4 col0x4 = matrix.c0;
             double4 col1x4 = matrix.c1;
