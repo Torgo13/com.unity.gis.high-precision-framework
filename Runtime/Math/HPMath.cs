@@ -94,7 +94,7 @@ namespace Unity.Geospatial.HighPrecision
             result.c0.w = 0.0;
         
             // c1
-            result.c1.y = r.c1.y * scale.y;
+            result.c1.x = r.c1.x * scale.y;
             result.c1.y = r.c1.y * scale.y;
             result.c1.z = r.c1.z * scale.y;
             result.c1.w = 0.0;
