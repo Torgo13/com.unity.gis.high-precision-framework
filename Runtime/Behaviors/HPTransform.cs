@@ -1,15 +1,36 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 
 using UnityEngine;
 using UnityEngine.Assertions;
 using Unity.Mathematics;
 using System.Runtime.CompilerServices;
+using Unity.Collections;
+using Debug = UnityEngine.Debug;
 
 namespace Unity.Geospatial.HighPrecision
 {
     //
     //  TODO - Changing the scale of the root resets the HPTransform's values!!!
     //
+public struct HPData
+{
+    public double3 UniversePosition;
+    public quaternion UniverseRotation;
+    public float3 LocalScale;
+    public bool hasChanged;
+    public bool enabled;
+    public bool isParented;
+
+    HPData(double3 universePosition, quaternion universeRotation, float3 localScale, bool hasChanged, bool enabled, bool isParented)
+    {
+        this.UniversePosition = universePosition;
+        this.UniverseRotation = universeRotation;
+        this.LocalScale = localScale;
+        this.hasChanged = hasChanged;
+        this.enabled = enabled;
+        this.isParented = isParented;
+    }
+}
 
     /// <summary>
     /// The HPTransform is the High-Precision Framework's primary class. It acts very
@@ -21,7 +42,7 @@ namespace Unity.Geospatial.HighPrecision
     [ExecuteAlways]
     [DisallowMultipleComponent]
     [AddComponentMenu("HighPrecision/HPTransform")]
-    public class HPTransform : HPNode
+    public unsafe class HPTransform : HPNode
     {
         /// <summary>
         /// <see langword="true"/> if all of the fields where set at least once;
@@ -29,6 +50,8 @@ namespace Unity.Geospatial.HighPrecision
         /// </summary>
         [SerializeField]
         private bool m_IsInitialized;
+
+        private bool isParented = false;
 
         /// <inheritdoc cref="HPNode.LocalPosition"/>
         [SerializeField]
@@ -48,6 +71,10 @@ namespace Unity.Geospatial.HighPrecision
         /// </summary>
         private HPNode m_Parent;
 
+        private NativeArray<HPData> _data;
+        private int _dataIndex = -1;
+        private HPData* _dataPtr;
+
         /// <summary>
         /// Cache Unity's <see href="https://docs.unity3d.com/ScriptReference/Transform.html">Transform</see> to reduce overhead of retrieving it everytime.
         /// </summary>
@@ -56,7 +83,7 @@ namespace Unity.Geospatial.HighPrecision
         /// <summary>
         /// Cache Unity's <see href="https://docs.unity3d.com/ScriptReference/Transform.html">Transform</see> to reduce overhead of retrieving it everytime.
         /// </summary>
-        private Transform CachedUnityTransform
+        public Transform CachedUnityTransform
         {
             get
             {
@@ -138,7 +165,19 @@ namespace Unity.Geospatial.HighPrecision
         /// <see langword="false"/> if the local transform values are still the same as the previous frame.
         /// </summary>
         private bool m_LocalHasChanged;
-        
+
+        public bool IsParented
+        {
+            get => isParented;
+            set
+            {
+                HPData data = _data[_dataIndex];
+                data.isParented = value;
+                _data[_dataIndex] = data;
+                isParented = value;
+            }
+        }
+
         /// <summary>
         /// The position of the HPTransform relative to its parent HPRoot or HPTransform
         /// </summary>
@@ -235,7 +274,7 @@ namespace Unity.Geospatial.HighPrecision
                 InvalidateLocalCache();
             }
         }
-        
+
         //
         //  TODO - When scale is set to zero, quaternion method is printing messages in the console
         //
@@ -379,13 +418,36 @@ namespace Unity.Geospatial.HighPrecision
             get { return m_Children.Count == 0; }
         }
 
+        public unsafe NativeArray<HPData> Data { get => _data; set => _data = value; }
+        public int DataIndex
+        {
+            get => _dataIndex;
+            set
+            {
+                _dataIndex = value;
+
+                // Update externally stored data
+                if (_dataIndex != -1 && _data.IsCreated)
+                {
+                    HPData hpData = _data[_dataIndex];
+                    hpData.UniversePosition = m_LocalPosition;
+                    hpData.UniverseRotation = m_LocalRotation;
+                    hpData.LocalScale = m_LocalScale;
+                    hpData.hasChanged = true;
+                    hpData.enabled = this.isActiveAndEnabled;
+                    hpData.isParented = this.isParented;
+                    _data[_dataIndex] = hpData;
+                }
+            }
+        }
+
         /// <summary>
         /// This method is called when the component or the GameObject is enabled.
         /// </summary>
         private void OnEnable()
         {
             Assert.IsNull(m_Parent);
-            UpdateParentRelation();
+            //UpdateParentRelation();
 
             //
             //  TODO - Find a way of initializing the HPTransform from the Unity Transform without
@@ -395,6 +457,14 @@ namespace Unity.Geospatial.HighPrecision
                 UpdateHPTransformFromUnityTransform();
 
             InvalidateLocalCache();
+
+            // Update externally stored data
+            if (_dataIndex != -1 && _data.IsCreated)
+            {
+                HPData hpData = _data[_dataIndex];
+                hpData.enabled = true;
+                _data[_dataIndex] = hpData;
+            }
         }
 
         /// <summary>
@@ -406,6 +476,14 @@ namespace Unity.Geospatial.HighPrecision
             {
                 m_Parent.UnregisterChild(this);
                 m_Parent = null;
+            }
+
+            // Update externally stored data
+            if (_dataIndex != -1 && _data.IsCreated)
+            {
+                HPData hpData = _data[_dataIndex];
+                hpData.enabled = false;
+                _data[_dataIndex] = hpData;
             }
         }
 
@@ -421,7 +499,7 @@ namespace Unity.Geospatial.HighPrecision
 
         /// <summary>
         /// This method is called when the component is reset in the inspector. By invalidating the local cache,
-        /// the underlying Unity Transform is updated. This method is important since resetting a component 
+        /// the underlying Unity Transform is updated. This method is important since resetting a component
         /// bypasses the properties and acts directly on the private serialized fields.
         /// </summary>
         private void Reset()
@@ -444,7 +522,7 @@ namespace Unity.Geospatial.HighPrecision
 
 
             Transform parent = CachedUnityTransform.parent;
-            
+
             HPNode hpNode = parent == null
                 ? null
                 : parent.GetComponentInParent<HPNode>();
@@ -584,7 +662,7 @@ namespace Unity.Geospatial.HighPrecision
         {
             double4x4 worldFromLocal = WorldMatrix;
 
-            UpdateParentRelation();
+            //UpdateParentRelation();
             CachedUnityTransform.hasChanged = false;
 
             double4x4 worldFromParent = m_Parent == null ? double4x4.identity : m_Parent.WorldMatrix;
@@ -599,7 +677,7 @@ namespace Unity.Geospatial.HighPrecision
 
             InvalidateLocalCache();
         }
-        
+
         /// <summary>
         /// Update the Unity <see href="https://docs.unity3d.com/ScriptReference/Transform.html">Transform</see>
         /// position, rotation and scaling value when the <see cref="m_Parent"/>
@@ -662,6 +740,18 @@ namespace Unity.Geospatial.HighPrecision
             m_LocalHasChanged = true;
             m_CachedLocalMatrixIsValid = false;
             InvalidateUniverseCache();
+
+
+            // Update externally stored data
+            if (_dataIndex != -1 && _data.IsCreated)
+            {
+                HPData hpData = _data[_dataIndex];
+                hpData.UniversePosition = m_LocalPosition;
+                hpData.UniverseRotation = m_LocalRotation;
+                hpData.LocalScale = m_LocalScale;
+                hpData.hasChanged = true;
+                _data[_dataIndex] = hpData;
+            }
         }
 
         /// <summary>

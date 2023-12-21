@@ -68,10 +68,10 @@ namespace Unity.Geospatial.HighPrecision
         {
             float3x3 r = math.float3x3(rotation);
             return math.double4x4(
-                math.double4(r.c0 * scale.x, 0.0f),
-                math.double4(r.c1 * scale.y, 0.0f),
-                math.double4(r.c2 * scale.z, 0.0f),
-                math.double4(translation, 1.0f));
+                math.double4(r.c0 * scale.x, 0.0),
+                math.double4(r.c1 * scale.y, 0.0),
+                math.double4(r.c2 * scale.z, 0.0),
+                math.double4(translation, 1.0));
         }
 
 		/// <summary>
