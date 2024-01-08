@@ -1,0 +1,241 @@
+#
+# https://github.com/alexkaratarakis/gitattributes
+#
+#
+# binary is a macro for -text -diff
+
+# Auto detect text files and perform LF normalization
+*        text=auto
+
+# C++
+*.c     text diff=cpp
+*.cc    text diff=cpp
+*.cxx   text diff=cpp
+*.cpp   text diff=cpp
+*.c++   text diff=cpp
+*.hpp   text diff=cpp
+*.h     text diff=cpp
+*.h++   text diff=cpp
+*.hh    text diff=cpp
+
+# Compiled Object files
+*.slo   binary
+*.lo    binary
+*.o     binary
+*.obj   binary
+
+# Precompiled Headers
+*.gch   binary
+*.pch   binary
+
+# CSharp
+*.cs       text diff=csharp
+*.cshtml   text diff=html
+*.csx      text diff=csharp
+
+# Java
+*.java          text diff=java
+*.kt            text diff=java
+*.groovy        text diff=java
+*.scala         text diff=java
+*.gradle        text diff=java
+*.gradle.kts    text diff=java
+
+# These files are binary and should be left untouched
+*.class         binary
+*.ear           binary
+*.jar           binary
+*.war           binary
+*.jks           binary
+*.Java          text diff=Java
+
+# These files are text and should be normalized (Convert crlf => lf)
+*.df            text
+*.js            text
+*.jsp           text
+*.jspf          text
+*.jspx          text
+*.properties    text
+*.tld           text
+*.tag           text
+*.tagx          text
+*.xml           text
+
+# Compiled Dynamic/Static libraries
+*.so    binary
+*.dylib binary
+*.dll   binary
+*.lai   binary
+*.la    binary
+*.a     binary
+*.lib   binary
+
+# Executables
+*.exe   binary
+*.out   binary
+*.app   binary
+
+# Visual studio
+*.csproj text merge=union
+*.sln    text merge=union
+
+# Documents
+*.bibtex   text diff=bibtex
+*.doc      diff=astextplain
+*.DOC      diff=astextplain
+*.docx     diff=astextplain
+*.DOCX     diff=astextplain
+*.dot      diff=astextplain
+*.DOT      diff=astextplain
+*.pdf      diff=astextplain
+*.PDF      diff=astextplain
+*.rtf      diff=astextplain
+*.RTF      diff=astextplain
+*.md       text diff=markdown
+*.tex      text diff=tex
+*.adoc     text
+*.textile  text
+*.mustache text
+*.csv      text
+*.tab      text
+*.tsv      text
+*.txt      text
+*.sql      text
+
+# Web
+*.htm           text diff=html
+*.html          text diff=html
+*.css           text diff=css
+*.scss          text diff=css
+*.sass          text
+
+# Scripts
+# These are explicitly unix files and should use lf
+*.{bash,[bB][aA][sS][hH]}     text eol=lf
+*.{fish,[fF][iI][sS][hH]}     text eol=lf
+*.{sh,[sS][hH]}               text eol=lf
+*.{zsh,[zZ][sS][hH]}          text eol=lf
+# These are explicitly windows files and should use crlf
+*.{cmd,[cC][mM][dD]} text eol=crlf
+*.{bat,[bB][aA][tT]} text eol=crlf
+*.{ps1,[pP][sS][1]}  text eol=crlf
+
+# Serialisation
+*.json     text
+*.toml     text
+*.xml      text
+*.yaml     text
+*.yml      text
+
+# Unity
+*.cginc              text
+*.shader             text
+
+# Unity YAML
+*.mat                merge=unityyamlmerge eol=lf
+*.anim               merge=unityyamlmerge eol=lf
+*.unity              merge=unityyamlmerge eol=lf
+*.prefab             merge=unityyamlmerge eol=lf
+*.asset              merge=unityyamlmerge eol=lf
+*.meta               merge=unityyamlmerge eol=lf
+*.controller         merge=unityyamlmerge eol=lf
+
+# "physic" for 3D but "physics" for 2D
+*.physicMaterial2D   merge=unityyamlmerge eol=lf
+*.physicMaterial     merge=unityyamlmerge eol=lf
+*.physicsMaterial2D  merge=unityyamlmerge eol=lf
+*.physicsMaterial    merge=unityyamlmerge eol=lf
+
+# Unity LFS
+*.cubemap            binary
+*.unitypackage       binary
+
+# Collapse Unity-generated files on GitHub
+*.asset             linguist-generated
+*.mat               linguist-generated
+*.meta              linguist-generated
+*.prefab            linguist-generated
+*.unity             linguist-generated
+
+# Spine export file for Unity
+*.skel.bytes        binary
+
+# 3D models
+*.3dm                binary
+*.3ds                binary
+*.blend              binary
+*.c4d                binary
+*.collada            binary
+*.dae                binary
+*.dxf                binary
+*.FBX                binary
+*.fbx                binary
+*.jas                binary
+*.lws                binary
+*.lxo                binary
+*.ma                 binary
+*.max                binary
+*.mb                 binary
+*.obj                binary
+*.ply                binary
+*.skp                binary
+*.stl                binary
+*.ztl                binary
+
+# Audio
+*.aif                binary
+*.aiff               binary
+*.it                 binary
+*.mod                binary
+*.mp3                binary
+*.ogg                binary
+*.s3m                binary
+*.wav                binary
+*.xm                 binary
+
+# Video
+*.asf                binary
+*.avi                binary
+*.flv                binary
+*.mov                binary
+*.mp4                binary
+*.mpeg               binary
+*.mpg                binary
+*.ogv                binary
+*.wmv                binary
+
+# Images
+*.bmp                binary
+*.exr                binary
+*.gif                binary
+*.hdr                binary
+*.iff                binary
+*.jpeg               binary
+*.jpg                binary
+*.pict               binary
+*.png                binary
+*.psd                binary
+*.tga                binary
+*.tif                binary
+*.tiff               binary
+
+# Compressed Archive
+*.7z                binary
+*.bz2               binary
+*.gz                binary
+*.rar               binary
+*.tar               binary
+*.zip               binary
+
+# Fonts
+*.otf               binary
+*.ttf               binary
+
+# Text files where line endings should be preserved
+*.patch    -text
+
+# Exclude files from exporting
+# https://git-scm.com/book/en/v2/Customizing-Git-Git-Attributes#_exporting_your_repository
+.gitattributes export-ignore
+.gitignore     export-ignore
+.gitkeep       export-ignore
