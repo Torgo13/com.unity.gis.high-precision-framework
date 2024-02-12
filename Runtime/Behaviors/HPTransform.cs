@@ -60,6 +60,12 @@ public struct HPData
         /// <inheritdoc cref="HPNode.LocalRotation"/>
         [SerializeField]
         private quaternion m_LocalRotation = quaternion.identity;
+        
+        /// <inheritdoc cref="HPNode.LocalPositionPointer"/>
+        private double3* m_LocalPositionPtr;
+        
+        /// <inheritdoc cref="HPNode.LocalRotationPointer"/>
+        private quaternion* m_LocalRotationPtr;
 
         /// <inheritdoc cref="HPNode.LocalScale"/>
         [SerializeField]
@@ -229,6 +235,14 @@ public struct HPData
                 InvalidateLocalCache();
             }
         }
+        
+        /// <summary>
+        /// Pointer to the position of the HPTransform, in universe space.
+        /// </summary>
+        public double3* LocalPositionPtr
+        {
+            get => m_LocalPositionPtr;
+        }
 
         /// <summary>
         /// The rotation of the HPTransform relative to its parent HPTransform or HPRoot
@@ -244,6 +258,14 @@ public struct HPData
 
                 InvalidateLocalCache();
             }
+        }
+        
+        /// <summary>
+        /// Pointer to the rotation of the HPTransform relative to its parent HPTransform or HPRoot
+        /// </summary>
+        public quaternion* LocalRotationPtr
+        {
+            get => m_LocalRotationPtr;
         }
 
         /// <summary>
@@ -437,6 +459,22 @@ public struct HPData
                     hpData.enabled = this.isActiveAndEnabled;
                     hpData.isParented = this.isParented;
                     _data[_dataIndex] = hpData;
+                }
+            }
+        }
+
+        public HPTransform()
+        {
+            unsafe
+            {
+                fixed(double3* PositionPtr = &m_LocalPosition)
+                {
+                    m_LocalPositionPtr = PositionPtr;
+                }
+                
+                fixed(quaternion* rotationPtr = &m_LocalRotation)
+                {
+                    m_LocalRotationPtr = rotationPtr;
                 }
             }
         }
@@ -734,7 +772,7 @@ public struct HPData
         /// <summary>
         /// Flag all caches related to local transforms to be recomputed.
         /// </summary>
-        private void InvalidateLocalCache()
+        public void InvalidateLocalCache()
         {
             m_IsInitialized = true;
             m_LocalHasChanged = true;
